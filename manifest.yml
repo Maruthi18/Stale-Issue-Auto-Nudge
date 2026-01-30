@@ -1,0 +1,20 @@
+modules:
+  scheduledTrigger:
+    - key: stale-issue-nudge-trigger
+      function: nudgeStaleIssues
+      interval: day
+function:
+  - key: nudgeStaleIssues
+    handler: index.run
+app:
+  runtime:
+    name: nodejs18.x
+  id: ari:cloud:ecosystem::app/placeholder-app-id
+permissions:
+  scopes:
+    - read:jira-work
+    - write:jira-work
+  external:
+    fetch:
+      backend:
+        - '*.atlassian.net'

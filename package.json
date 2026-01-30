@@ -1,0 +1,27 @@
+{
+  "name": "stale-issue-auto-nudge",
+  "version": "1.0.0",
+  "description": "A backend-only Atlassian Forge app that automatically identifies stale 'In Progress' issues and nudges assignees to update them.",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "deploy": "forge deploy",
+    "install:app": "forge install",
+    "tunnel": "forge tunnel"
+  },
+  "keywords": [
+    "forge",
+    "jira",
+    "automation",
+    "stale-issues",
+    "agile"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@forge/api": "^4.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}
