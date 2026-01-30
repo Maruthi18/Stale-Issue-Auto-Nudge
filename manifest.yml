@@ -1,15 +1,26 @@
 modules:
+  function:
+    - key: index-run
+      handler: index.run
+    - key: trigger-handler
+      handler: trigger.handler
   scheduledTrigger:
     - key: stale-issue-nudge-trigger
-      function: nudgeStaleIssues
-      interval: day
-function:
-  - key: nudgeStaleIssues
-    handler: index.run
+      function: index-run
+      interval: hour  # Changed to 'hour' for testing - change back to 'day' later
+  jira:globalPage:
+    - key: stale-issue-global-page
+      resource: admin-page
+      resolver:
+        function: trigger-handler
+      title: Stale Issue Auto-Nudge
+resources:
+  - key: admin-page
+    path: static/admin
 app:
   runtime:
-    name: nodejs18.x
-  id: ari:cloud:ecosystem::app/placeholder-app-id
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/89ee6a37-c321-4839-91c8-4eb9dadeca89
 permissions:
   scopes:
     - read:jira-work
@@ -17,4 +28,4 @@ permissions:
   external:
     fetch:
       backend:
-        - '*.atlassian.net'
+        - address: "*.atlassian.net"

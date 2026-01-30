@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stale Issue Auto-Nudge</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f5f7;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        h1 {
+            color: #172b4d;
+            margin-top: 0;
+        }
+        .info {
+            background: #deebff;
+            border-left: 4px solid #0052cc;
+            padding: 12px 16px;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .info p {
+            margin: 8px 0;
+            color: #172b4d;
+        }
+        button {
+            background: #0052cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: #0065ff;
+        }
+        button:disabled {
+            background: #dfe1e6;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 3px;
+            display: block;
+            min-height: 48px;
+        }
+        .result.success {
+            background: #e3fcef;
+            border-left: 4px solid #00875a;
+            color: #006644;
+        }
+        .result.error {
+            background: #ffebe6;
+            border-left: 4px solid #de350b;
+            color: #bf2600;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0052cc;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .details {
+            margin-top: 12px;
+            font-size: 14px;
+            background: rgba(0,0,0,0.05);
+            padding: 12px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Stale Issue Auto-Nudge</h1>
+
+        <div class="info">
+            <p><strong>What this does:</strong></p>
+            <p>Searches for "In Progress" issues that haven't been updated in 5+ days and posts reminder comments to assignees.</p>
+        </div>
+
+        <button id="runButton" onclick="runNudge()">
+            Run Now
+        </button>
+
+        <div id="result" class="result">Ready. Click "Run Now" to start.</div>
+    </div>
+
+    <script type="module">
+        import { invoke } from "https://cdn.jsdelivr.net/npm/@forge/bridge@3.6.0/+esm";
+
+        window.runNudge = async function() {
+            const button = document.getElementById('runButton');
+            const resultDiv = document.getElementById('result');
+
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span>Running...';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '<span class="spinner"></span>Running...';
+
+            try {
+                console.log('Calling runManually resolver...');
+
+                // Call the Forge resolver
+                const response = await invoke('runManually', {});
+
+                console.log('Response:', response);
+
+                // Show result
+                resultDiv.className = response.success ? 'result success' : 'result error';
+
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <strong>✓ Success!</strong><br>
+                        ${response.message}
+                        ${response.details ? `
+                            <div class="details">
+                                Total found: ${response.details.totalFound}<br>
+                                Nudged: ${response.details.nudged}<br>
+                                Failed: ${response.details.failed}
+                            </div>
+                        ` : ''}
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <strong>✗ Error</strong><br>
+                        ${response.message}
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>✗ Error</strong><br>
+                    ${error.message || 'Failed to run the nudge'}
+                `;
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = 'Run Now';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -19,7 +19,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@forge/api": "^4.0.0"
+    "@forge/api": "^4.0.0",
+    "@forge/resolver": "^1.5.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0"

@@ -35,29 +35,39 @@ async function findStaleIssues() {
 
   console.log(`Searching for stale issues with JQL: ${jql}`);
 
-  const response = await api.asApp().requestJira(route`/rest/api/3/search`, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      jql: jql,
-      maxResults: CONFIG.maxResults,
-      fields: ['summary', 'assignee', 'updated', 'status', 'key'],
-    }),
-  });
+  try {
+    // Use the requestJira with proper routing
+    const response = await api.asApp().requestJira(
+      route`/rest/api/3/search/jql`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jql: jql,
+          maxResults: CONFIG.maxResults,
+          fields: ['key', 'summary', 'assignee', 'updated', 'status'],
+        }),
+      }
+    );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`Failed to search issues: ${response.status} - ${errorText}`);
-    throw new Error(`Failed to search issues: ${response.status}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to search issues: ${response.status} - ${errorText}`);
+      throw new Error(`Failed to search issues: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const total = typeof data.total === 'number' ? data.total : (data.issues ? data.issues.length : 0);
+    console.log(`Found ${total} stale issues (processing up to ${CONFIG.maxResults})`);
+
+    return data.issues || [];
+  } catch (error) {
+    console.error('Error in findStaleIssues:', error);
+    throw error;
   }
-
-  const data = await response.json();
-  console.log(`Found ${data.total} stale issues (processing up to ${CONFIG.maxResults})`);
-
-  return data.issues || [];
 }
 
 /**
