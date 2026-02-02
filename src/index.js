@@ -1,4 +1,5 @@
 import api, { route } from '@forge/api';
+import { sendSummaryEmail } from './email.js';
 
 /**
  * Configuration for stale issue detection
@@ -251,6 +252,20 @@ export async function run(event) {
     }
 
     console.log(`Stale Issue Auto-Nudge completed: ${summary.nudged} nudged, ${summary.failed} failed out of ${summary.totalFound} found`);
+
+    // Send email summary
+    try {
+      console.log('Sending email summary...');
+      const emailSent = await sendSummaryEmail(summary);
+      if (emailSent) {
+        console.log('Email summary sent successfully');
+      } else {
+        console.warn('Failed to send email summary (check configuration)');
+      }
+    } catch (emailError) {
+      console.error('Error sending email summary:', emailError);
+      // Don't fail the whole run if email fails
+    }
 
     return summary;
   } catch (error) {

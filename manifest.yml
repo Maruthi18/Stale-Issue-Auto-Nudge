@@ -7,16 +7,25 @@ modules:
   scheduledTrigger:
     - key: stale-issue-nudge-trigger
       function: index-run
-      interval: hour  # Changed to 'hour' for testing - change back to 'day' later
+      interval: day  # Changed to 'hour' for testing - change back to 'day' later
   jira:globalPage:
     - key: stale-issue-global-page
       resource: admin-page
       resolver:
         function: trigger-handler
       title: Stale Issue Auto-Nudge
+  jira:issuePanel:
+    - key: stale-issue-panel
+      resource: issue-panel
+      resolver:
+        function: trigger-handler
+      title: Stale Issue Auto-Nudge
+      icon: https://developer.atlassian.com/platform/forge/images/issue-panel-icon.svg
 resources:
   - key: admin-page
     path: static/admin
+  - key: issue-panel
+    path: static/issue-panel
 app:
   runtime:
     name: nodejs20.x
@@ -29,3 +38,4 @@ permissions:
     fetch:
       backend:
         - address: "*.atlassian.net"
+        - address: "api.sendgrid.com"
